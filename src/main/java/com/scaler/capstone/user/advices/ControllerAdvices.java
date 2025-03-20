@@ -1,6 +1,7 @@
 package com.scaler.capstone.user.advices;
 
 import com.scaler.capstone.user.dtos.ExceptionDTO;
+import com.scaler.capstone.user.exception.InvalidDataException;
 import com.scaler.capstone.user.exception.InvalidPasswordException;
 import com.scaler.capstone.user.exception.UserAlreadyExistException;
 import org.springframework.http.HttpStatus;
@@ -39,6 +40,12 @@ public class ControllerAdvices {
 
     @ExceptionHandler(InvalidPasswordException.class)
     ResponseEntity<ExceptionDTO> handleInvalidPasswordException(InvalidPasswordException ex){
+        return new ResponseEntity<>(new ExceptionDTO(HttpStatus.BAD_REQUEST, ex.getMessage()),
+                HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(InvalidDataException.class)
+    ResponseEntity<ExceptionDTO> handleInvalidDataException(InvalidDataException ex){
         return new ResponseEntity<>(new ExceptionDTO(HttpStatus.BAD_REQUEST, ex.getMessage()),
                 HttpStatus.BAD_REQUEST);
     }

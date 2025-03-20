@@ -3,6 +3,8 @@ package com.scaler.capstone.user.dtos;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 public class SignUpRequestDTO {
@@ -14,4 +16,5 @@ public class SignUpRequestDTO {
     private String state;
     private String zipcode;
     private String country;
+    private List<String> roles;
 }

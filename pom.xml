@@ -82,6 +82,11 @@
 			<artifactId>flyway-mysql</artifactId>
 			<version>10.6.0</version>
 		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-oauth2-authorization-server</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>

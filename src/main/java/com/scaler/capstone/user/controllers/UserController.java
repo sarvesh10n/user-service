@@ -4,6 +4,7 @@ import com.scaler.capstone.user.dtos.LoginRequestDTO;
 import com.scaler.capstone.user.dtos.LoginResponseDTO;
 import com.scaler.capstone.user.dtos.SignUpRequestDTO;
 import com.scaler.capstone.user.dtos.UserDTO;
+import com.scaler.capstone.user.exception.InvalidDataException;
 import com.scaler.capstone.user.exception.InvalidPasswordException;
 import com.scaler.capstone.user.exception.UserAlreadyExistException;
 import com.scaler.capstone.user.models.Token;
@@ -27,10 +28,10 @@ public class UserController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<UserDTO> signup(@RequestBody SignUpRequestDTO requestDTO) throws UserAlreadyExistException, InvalidPasswordException {
+    public ResponseEntity<UserDTO> signup(@RequestBody SignUpRequestDTO requestDTO) throws UserAlreadyExistException, InvalidPasswordException, InvalidDataException {
         User user = userService.createUser(requestDTO.getEmail(),
                 requestDTO.getPassword(), requestDTO.getName(), requestDTO.getStreet(), requestDTO.getCity(),
-                requestDTO.getState(), requestDTO.getZipcode(), requestDTO.getCountry());
+                requestDTO.getState(), requestDTO.getZipcode(), requestDTO.getCountry(), requestDTO.getRoles());
 
         return new ResponseEntity<>(UserDTO.fromUser(user), HttpStatus.CREATED);
     }
