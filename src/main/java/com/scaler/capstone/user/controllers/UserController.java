@@ -13,18 +13,20 @@ import com.scaler.capstone.user.services.TokenService;
 import com.scaler.capstone.user.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/users")
 public class UserController {
 
     private UserService userService;
-    private TokenService tokenService;
-    
-    public UserController(UserService userService, TokenService tokenService) {
+
+    public UserController(UserService userService) {
         this.userService = userService;
-        this.tokenService = tokenService;
     }
 
     @PostMapping("/signup")
@@ -36,15 +38,26 @@ public class UserController {
         return new ResponseEntity<>(UserDTO.fromUser(user), HttpStatus.CREATED);
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO requestDTO) {
-        Token token = tokenService.login(requestDTO.getEmail(), requestDTO.getPassword());
-        return new ResponseEntity<>(LoginResponseDTO.fromToken(token), HttpStatus.OK);
+    @GetMapping("/getuser/all")
+    @PreAuthorize("hasRole('ROLE_SUPER_ADMIN')") //This will enable role based access
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
+        List<User> userList = userService.getAllUser();
+        List<UserDTO> userDtoList = new ArrayList<>();
+        for (User user : userList) {
+            userDtoList.add(UserDTO.fromUser(user));
+        }
+        return new ResponseEntity<>(userDtoList, HttpStatus.OK);
     }
 
-    @PostMapping("/validate/{token}")
-    public ResponseEntity<UserDTO> validateUser(@PathVariable String token) {
-        User user = tokenService.validateToken(token);
+    @GetMapping("/getuser/{email}")
+    public ResponseEntity<UserDTO> getUsersByEmail(@PathVariable String email) {
+        User user = userService.getUserByEmail(email);
+        return new ResponseEntity<>(UserDTO.fromUser(user), HttpStatus.OK);
+    }
+
+    @GetMapping("/getuser/{id}")
+    public ResponseEntity<UserDTO> getAllUsers(@PathVariable Long id) {
+        User user = userService.getUserByEmail(id);
         return new ResponseEntity<>(UserDTO.fromUser(user), HttpStatus.OK);
     }
 }
