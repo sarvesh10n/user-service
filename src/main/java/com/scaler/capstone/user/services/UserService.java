@@ -1,5 +1,6 @@
 package com.scaler.capstone.user.services;
 
+import com.scaler.capstone.user.exception.InvalidPasswordException;
 import com.scaler.capstone.user.exception.UserAlreadyExistException;
 import com.scaler.capstone.user.models.Address;
 import com.scaler.capstone.user.models.User;
@@ -8,9 +9,16 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class UserService {
+
+    private final String PASSWORD_REGEX =
+            "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
+
+    private final Pattern pattern = Pattern.compile(PASSWORD_REGEX);
 
     private BCryptPasswordEncoder bcryptpasswordencoder;
     private UserRepository userRepository;
@@ -20,9 +28,16 @@ public class UserService {
     }
 
     public User createUser(String email, String password, String name, String street,
-                           String city, String state, String zip, String country) throws UserAlreadyExistException {
+                           String city, String state, String zip, String country) throws UserAlreadyExistException, InvalidPasswordException {
 
-        //1. Verify if the user exists
+
+        if(!isValidPassword(password))
+        {
+            throw new InvalidPasswordException("Invalid Password. Password should be at least 8 characters long " +
+                    "and should have at least one digit, one uppercase letter, " +
+                    "one lowercase letter and one special character");
+        }
+
         Optional<User> user = userRepository.findByEmail(email);
         if(!user.isEmpty()) {
             throw new UserAlreadyExistException("User already present: " + email);
@@ -42,6 +57,15 @@ public class UserService {
         newUser.setHashedPassword(bcryptpasswordencoder.encode(password));
         newUser.setAddress(address);
         return userRepository.save(newUser);
+    }
+
+    private boolean isValidPassword(String password) {
+        if (password == null || password.isEmpty()) {
+            return false;
+        }
+
+        Matcher matcher = pattern.matcher(password);
+        return matcher.matches();
     }
 
 }

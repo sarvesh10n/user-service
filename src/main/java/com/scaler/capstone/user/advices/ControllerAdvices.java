@@ -1,6 +1,7 @@
 package com.scaler.capstone.user.advices;
 
 import com.scaler.capstone.user.dtos.ExceptionDTO;
+import com.scaler.capstone.user.exception.InvalidPasswordException;
 import com.scaler.capstone.user.exception.UserAlreadyExistException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,5 +35,11 @@ public class ControllerAdvices {
     ResponseEntity<ExceptionDTO> handleUserNameNotFoundException(UsernameNotFoundException ex){
         return new ResponseEntity<>(new ExceptionDTO(HttpStatus.NOT_FOUND, ex.getMessage()),
                 HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(InvalidPasswordException.class)
+    ResponseEntity<ExceptionDTO> handleInvalidPasswordException(InvalidPasswordException ex){
+        return new ResponseEntity<>(new ExceptionDTO(HttpStatus.BAD_REQUEST, ex.getMessage()),
+                HttpStatus.BAD_REQUEST);
     }
 }
