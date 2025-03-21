@@ -22,7 +22,7 @@ class ScalerCapstoneUserApplicationTests {
 	}
 
 	//@Test
-	void addRegisterSamplePostmanClient()
+	void addRegisterSampleClient()
 	{
 		RegisteredClient oidcClient = RegisteredClient.withId(UUID.randomUUID().toString())
 				.clientId("scaler")

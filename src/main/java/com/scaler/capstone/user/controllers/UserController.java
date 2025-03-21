@@ -40,7 +40,7 @@ public class UserController {
         return new ResponseEntity<>(UserDTO.fromUser(user), HttpStatus.CREATED);
     }
 
-    @GetMapping("/getuser/all")
+    @GetMapping("/getallusers")
     @PreAuthorize("hasRole('ROLE_SUPER_ADMIN')") //This will enable role based access
     public ResponseEntity<List<UserDTO>> getAllUsers() {
         List<User> userList = userService.getAllUser();
