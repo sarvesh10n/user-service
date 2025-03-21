@@ -2,7 +2,7 @@
 
 # Setup Database
 
-## Database queries
+## Database queries for initial setup
 
 ```
 create user 'sarvesh'@'localhost';
