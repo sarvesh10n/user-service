@@ -1,5 +1,7 @@
 package com.scaler.capstone.user.services;
 
+import com.scaler.capstone.user.dtos.ResetPasswordDTO;
+import com.scaler.capstone.user.dtos.SignUpRequestDTO;
 import com.scaler.capstone.user.exception.InvalidDataException;
 import com.scaler.capstone.user.exception.InvalidPasswordException;
 import com.scaler.capstone.user.exception.UserAlreadyExistException;
@@ -36,9 +38,27 @@ public class UserService {
         this.roleRepository = roleRepository;
     }
 
-    public User createUser(String email, String password, String name, String street,
-                           String city, String state, String zip, String country, List<String> roles) throws UserAlreadyExistException, InvalidPasswordException,InvalidDataException {
+    public User createUser(SignUpRequestDTO signUpRequestDTO) throws UserAlreadyExistException, InvalidPasswordException,InvalidDataException {
 
+        String email = signUpRequestDTO.getEmail();
+
+        String password = signUpRequestDTO.getPassword();
+        String name = signUpRequestDTO.getName();
+        String street = signUpRequestDTO.getStreet();
+        String city  = signUpRequestDTO.getCity();
+        String state = signUpRequestDTO.getState();
+        String zip = signUpRequestDTO.getZipcode();
+        String country = signUpRequestDTO.getCountry();
+        List<String> roles = signUpRequestDTO.getRoles();
+        String resetPasswordQuestion = signUpRequestDTO.getResetPasswordQuestion();
+        String resetPasswordAnswer = signUpRequestDTO.getResetPasswordAnswer();
+
+        if(email == null || password == null || name == null || street == null || city == null || state == null
+                || zip == null || country == null || roles == null || resetPasswordQuestion == null
+                || resetPasswordAnswer == null)
+        {
+            throw new InvalidDataException("Invalid data");
+        }
 
         if(!isValidPassword(password))
         {
@@ -100,17 +120,44 @@ public class UserService {
         return user.get();
     }
 
-    public User getUserByEmail(Long id)  {
-        Optional<User> user = userRepository.findById(id);
-        if(user.isEmpty())
-        {
-            throw new UsernameNotFoundException("User by Id: " + id + " doesn't exist.");
-        }
-        return user.get();
-    }
+
 
     public List<User> getAllUser()  {
         return userRepository.findAll();
+    }
+
+    public User resetPassword(ResetPasswordDTO resetPasswordDTO) throws InvalidDataException {
+        Optional<User> optionlUser = userRepository.findByEmail(resetPasswordDTO.getEmail());
+        if(optionlUser.isEmpty())
+        {
+            throw new UsernameNotFoundException("User by Email: " + resetPasswordDTO.getEmail()
+                    + " doesn't exist.");
+        }
+        User user = optionlUser.get();
+        String actualResetPasswordQuestion = user.getResetPasswordQuestion();
+        String actualResetPasswordAnswer = user.getResetPasswordAnswer();
+
+        if(!resetPasswordDTO.getResetPasswordQuestion().equalsIgnoreCase(actualResetPasswordQuestion))
+        {
+            throw new InvalidDataException("Reset Password Question does not match.");
+        }
+
+        if(!resetPasswordDTO.getResetPasswordAnswer().equalsIgnoreCase(actualResetPasswordAnswer))
+        {
+            throw new InvalidDataException("Reset Password Answer does not match.");
+        }
+
+        String newEncodedPassword = bcryptpasswordencoder.encode(resetPasswordDTO.getNewPassword());
+        user.setHashedPassword(newEncodedPassword);
+        return userRepository.save(user);
+    }
+
+    public String getResetPasswordQuestion(String email) throws InvalidDataException {
+        Optional<User> user = userRepository.findByEmail(email);
+        if(user.isEmpty()){
+            throw new UsernameNotFoundException("User by Email: " + email + " doesn't exist.");
+        }
+        return user.get().getResetPasswordQuestion();
     }
 
     private boolean isValidPassword(String password) {
