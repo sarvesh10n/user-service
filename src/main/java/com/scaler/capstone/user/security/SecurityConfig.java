@@ -5,6 +5,7 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import com.scaler.capstone.user.security.models.CustomUserDetails;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -78,7 +79,7 @@ public class SecurityConfig {
                 .securityMatcher("/users/**")
                 .authorizeHttpRequests(authorize -> authorize
                                 .requestMatchers("/users/signup","users/resetpassword","users/getresetpasswordquestion/**").permitAll() // Public endpoints
-                                .requestMatchers("/users/getuser/**", "/users/addrole/**", "/users/removerole/**").authenticated() // Require authentication for this endpoint
+                                .requestMatchers("/users/getuser/**", "/users/addrole/**", "/users/removerole/**", "/users/updateuser/**","/users/deleteuser/**").authenticated() // Require authentication for this endpoint
                         //.anyRequest().authenticated()
                 )
                 .csrf(csrf -> csrf.disable())
@@ -156,6 +157,9 @@ public class SecurityConfig {
                             .map(c -> c.replaceFirst("^ROLE_", ""))
                             .collect(Collectors.collectingAndThen(Collectors.toSet(), Collections::unmodifiableSet));
                     claims.put("roles", roles);
+                    claims.put("userId", ((CustomUserDetails)context.getPrincipal().getPrincipal()).getUserId());
+                    claims.put("name", ((CustomUserDetails)context.getPrincipal().getPrincipal()).getName());
+                    claims.put("address", ((CustomUserDetails)context.getPrincipal().getPrincipal()).getAddress());
                 });
             }
         };

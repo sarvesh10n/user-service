@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
@@ -123,5 +124,44 @@ public class UserController {
 
         User updatedUser = userService.removeRole(id,roleName);
         return new ResponseEntity<>(UserDTO.fromUser(updatedUser), HttpStatus.OK);
+    }
+
+    @PatchMapping("/updateuser/{id}")
+    public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @RequestBody Map<String, Object> updates)
+    {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication instanceof JwtAuthenticationToken) {
+            // Extract the JWT token
+            Jwt jwt = ((JwtAuthenticationToken) authentication).getToken();
+            String userId = jwt.getClaim("userId");  // username is email
+            if (!userId.equalsIgnoreCase(String.valueOf(id))) { // Case-insensitive check
+                throw new AccessDeniedException("You cannot update another user's data.");
+            }
+        }
+        else {
+            throw new BadCredentialsException("Authentication is not valid.");
+        }
+
+        User updatedUser = userService.updateUser(id,updates);
+        return new ResponseEntity<>(UserDTO.fromUser(updatedUser), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/deleteuser/{email}")
+    public ResponseEntity<Void> deleteUser(@PathVariable String email ) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication instanceof JwtAuthenticationToken) {
+            // Extract the JWT token
+            Jwt jwt = ((JwtAuthenticationToken) authentication).getToken();
+            String username = jwt.getClaim("sub");  // username is email
+            if (!email.equalsIgnoreCase(username)) { // Case-insensitive check
+                throw new AccessDeniedException("You cannot delete another user.");
+            }
+        }
+        else {
+            throw new BadCredentialsException("Authentication is not valid.");
+        }
+
+        userService.deleteUser(email);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
