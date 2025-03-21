@@ -85,4 +85,43 @@ public class UserController {
         User user = userService.resetPassword(resetPasswordDTO);
         return new ResponseEntity<>(UserDTO.fromUser(user), HttpStatus.OK);
     }
+
+    @PatchMapping("/addrole/{id}")
+    public ResponseEntity<UserDTO> addRole(@PathVariable Long id, @RequestParam String roleName)
+    {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication instanceof JwtAuthenticationToken) {
+            // Extract the JWT token
+            Jwt jwt = ((JwtAuthenticationToken) authentication).getToken();
+            String userId = jwt.getClaim("userId");  // username is email
+            if (!userId.equalsIgnoreCase(String.valueOf(id))) { // Case-insensitive check
+                throw new AccessDeniedException("You cannot update another user's data.");
+            }
+        }
+        else {
+            throw new BadCredentialsException("Authentication is not valid.");
+        }
+
+        User updatedUser = userService.addRole(id,roleName);
+        return new ResponseEntity<>(UserDTO.fromUser(updatedUser), HttpStatus.OK);
+    }
+
+    @PatchMapping("/removerole/{id}")
+    public ResponseEntity<UserDTO> removeRole(@PathVariable Long id, @RequestParam String roleName) throws InvalidDataException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication instanceof JwtAuthenticationToken) {
+            // Extract the JWT token
+            Jwt jwt = ((JwtAuthenticationToken) authentication).getToken();
+            String userId = jwt.getClaim("userId");  // username is email
+            if (!userId.equalsIgnoreCase(String.valueOf(id))) { // Case-insensitive check
+                throw new AccessDeniedException("You cannot update another user's data.");
+            }
+        }
+        else {
+            throw new BadCredentialsException("Authentication is not valid.");
+        }
+
+        User updatedUser = userService.removeRole(id,roleName);
+        return new ResponseEntity<>(UserDTO.fromUser(updatedUser), HttpStatus.OK);
+    }
 }

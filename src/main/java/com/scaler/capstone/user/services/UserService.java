@@ -160,6 +160,47 @@ public class UserService {
         return user.get().getResetPasswordQuestion();
     }
 
+    public User addRole(Long id, String roleName)
+    {
+        Optional<User> optionalUser = userRepository.findById(id);
+        if(optionalUser.isEmpty())
+        {
+            throw new UsernameNotFoundException("User by id: " + id + " doesn't exist.");
+        }
+        User user = optionalUser.get();
+
+        Role addRole;
+        if(roleRepository.findByName(roleName).isPresent())
+        {
+            addRole = roleRepository.findByName(roleName).get();
+        }
+        else
+        {
+            addRole = new Role();
+            addRole.setName(roleName);
+            roleRepository.save(addRole);
+        }
+        user.getRoles().add(addRole);
+        return userRepository.save(user);
+    }
+
+    public User removeRole(Long id, String roleName) throws InvalidDataException {
+        Optional<User> optionalUser = userRepository.findById(id);
+        if(optionalUser.isEmpty())
+        {
+            throw new UsernameNotFoundException("User by id: " + id + " doesn't exist.");
+        }
+        User user = optionalUser.get();
+
+        Optional<Role> optionalRole = roleRepository.findByName(roleName);
+        if(optionalRole.isEmpty())
+        {
+            throw new InvalidDataException("Role : " +roleName+" does not exist" );
+        }
+        user.getRoles().remove(optionalRole.get());
+        return userRepository.save(user);
+    }
+
     private boolean isValidPassword(String password) {
         if (password == null || password.isEmpty()) {
             return false;

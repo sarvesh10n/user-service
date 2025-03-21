@@ -11,15 +11,17 @@ import java.util.List;
 @Getter
 @Setter
 public class UserDTO {
+    private Long id;
     private String name;
     private String email;
     private String address;
     private List<String> roles;
 
     public static UserDTO fromUser(User user){
-        UserDTO userDto = new UserDTO();
-        userDto.setName(user.getName());
-        userDto.setEmail(user.getEmail());
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(user.getId());
+        userDTO.setName(user.getName());
+        userDTO.setEmail(user.getEmail());
 
         if(user.getAddress() != null){
             String addrs = user.getAddress().getStreet() +"," +
@@ -27,7 +29,7 @@ public class UserDTO {
                     user.getAddress().getState() + "," +
                     user.getAddress().getCountry() + " - " +
                     user.getAddress().getZipcode();
-            userDto.setAddress(addrs);
+            userDTO.setAddress(addrs);
         }
 
         if(user.getRoles() != null){
@@ -36,8 +38,8 @@ public class UserDTO {
             {
                 roles.add(role.getName());
             }
-            userDto.setRoles(roles);
+            userDTO.setRoles(roles);
         }
-        return userDto;
+        return userDTO;
     }
 }

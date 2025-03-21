@@ -78,7 +78,7 @@ public class SecurityConfig {
                 .securityMatcher("/users/**")
                 .authorizeHttpRequests(authorize -> authorize
                                 .requestMatchers("/users/signup","users/resetpassword","users/getresetpasswordquestion/**").permitAll() // Public endpoints
-                                .requestMatchers("/users/getuser/**").authenticated() // Require authentication for this endpoint
+                                .requestMatchers("/users/getuser/**", "/users/addrole/**", "/users/removerole/**").authenticated() // Require authentication for this endpoint
                         //.anyRequest().authenticated()
                 )
                 .csrf(csrf -> csrf.disable())
