@@ -1,5 +1,6 @@
 package com.scaler.capstone.user.dtos;
 
+import com.scaler.capstone.user.enums.Roles;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
@@ -33,7 +34,7 @@ public class SignUpRequestDTO {
     @NotBlank(message = "Country cannot be blank")
     private String country;
 
-    private List<String> roles;
+    private List<Roles> roles;
 
     @NotBlank(message = "Reset Password Question cannot be blank")
     private String resetPasswordQuestion;

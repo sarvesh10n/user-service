@@ -1,5 +1,6 @@
 package com.scaler.capstone.user.controllers;
 
+import com.scaler.capstone.user.enums.Roles;
 import com.scaler.capstone.user.dtos.ResetPasswordDTO;
 import com.scaler.capstone.user.dtos.SignUpRequestDTO;
 import com.scaler.capstone.user.dtos.UserDTO;
@@ -42,24 +43,14 @@ public class UserController {
         return new ResponseEntity<>(UserDTO.fromUser(user), HttpStatus.CREATED);
     }
 
-    @GetMapping("/getallusers")
-    @PreAuthorize("hasRole('ROLE_SUPER_ADMIN')")
-    public ResponseEntity<List<UserDTO>> getAllUsers() {
-        List<User> userList = userService.getAllUser();
-        List<UserDTO> userDTOList = new ArrayList<>();
-        for (User user : userList) {
-            userDTOList.add(UserDTO.fromUser(user));
-        }
-        return new ResponseEntity<>(userDTOList, HttpStatus.OK);
-    }
 
     @GetMapping("/getuser/{email}")
     public ResponseEntity<UserDTO> getUsersByEmail(@PathVariable String email) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication instanceof JwtAuthenticationToken) {
             Jwt jwt = ((JwtAuthenticationToken) authentication).getToken();
-            String username = jwt.getClaim("sub");  // username is email
-            if (!email.equalsIgnoreCase(username)) { // Case-insensitive check
+            String username = jwt.getClaim("sub");
+            if (!email.equalsIgnoreCase(username)) {
                 throw new AccessDeniedException("You cannot access another user's data.");
             }
         }
@@ -86,13 +77,13 @@ public class UserController {
     }
 
     @PatchMapping("/addrole/{id}")
-    public ResponseEntity<UserDTO> addRole(@PathVariable Long id, @RequestParam String roleName)
+    public ResponseEntity<UserDTO> addRole(@PathVariable Long id, @RequestParam Roles roleName)
     {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication instanceof JwtAuthenticationToken) {
             Jwt jwt = ((JwtAuthenticationToken) authentication).getToken();
-            String userId = jwt.getClaim("userId");  // username is email
-            if (!userId.equalsIgnoreCase(String.valueOf(id))) { // Case-insensitive check
+            String userId = jwt.getClaim("userId");  
+            if (!userId.equalsIgnoreCase(String.valueOf(id))) { 
                 throw new AccessDeniedException("You cannot update another user's data.");
             }
         }
@@ -105,12 +96,12 @@ public class UserController {
     }
 
     @PatchMapping("/removerole/{id}")
-    public ResponseEntity<UserDTO> removeRole(@PathVariable Long id, @RequestParam String roleName) throws InvalidDataException {
+    public ResponseEntity<UserDTO> removeRole(@PathVariable Long id, @RequestParam Roles roleName) throws InvalidDataException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication instanceof JwtAuthenticationToken) {
             Jwt jwt = ((JwtAuthenticationToken) authentication).getToken();
-            String userId = jwt.getClaim("userId");  // username is email
-            if (!userId.equalsIgnoreCase(String.valueOf(id))) { // Case-insensitive check
+            String userId = jwt.getClaim("userId");  
+            if (!userId.equalsIgnoreCase(String.valueOf(id))) { 
                 throw new AccessDeniedException("You cannot update another user's data.");
             }
         }
@@ -128,8 +119,8 @@ public class UserController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication instanceof JwtAuthenticationToken) {
             Jwt jwt = ((JwtAuthenticationToken) authentication).getToken();
-            String userId = jwt.getClaim("userId");  // username is email
-            if (!userId.equalsIgnoreCase(String.valueOf(id))) { // Case-insensitive check
+            String userId = jwt.getClaim("userId");  
+            if (!userId.equalsIgnoreCase(String.valueOf(id))) { 
                 throw new AccessDeniedException("You cannot update another user's data.");
             }
         }
@@ -146,8 +137,8 @@ public class UserController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication instanceof JwtAuthenticationToken) {
             Jwt jwt = ((JwtAuthenticationToken) authentication).getToken();
-            String username = jwt.getClaim("sub");  // username is email
-            if (!email.equalsIgnoreCase(username)) { // Case-insensitive check
+            String username = jwt.getClaim("sub");
+            if (!email.equalsIgnoreCase(username)) {
                 throw new AccessDeniedException("You cannot delete another user.");
             }
         }

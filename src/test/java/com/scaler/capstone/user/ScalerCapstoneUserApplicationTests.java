@@ -9,6 +9,7 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @SpringBootTest
@@ -21,7 +22,7 @@ class ScalerCapstoneUserApplicationTests {
 	void contextLoads() {
 	}
 
-	//@Test
+//	@Test
 	void addRegisterSampleClient()
 	{
 		RegisteredClient oidcClient = RegisteredClient.withId(UUID.randomUUID().toString())
@@ -33,6 +34,7 @@ class ScalerCapstoneUserApplicationTests {
 				.redirectUri("https://oauth.pstmn.io/v1/callback")
 				.postLogoutRedirectUri("https://oauth.pstmn.io/v1/callback")
 				.scope("ADMIN")
+				.clientIdIssuedAt(Instant.now())
 				.clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
 				.build();
 		registeredClientRepository.save(oidcClient);

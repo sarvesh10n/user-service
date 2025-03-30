@@ -11,7 +11,7 @@ public class CustomGrantedAuthority implements GrantedAuthority {
     private String authority;
 
     public CustomGrantedAuthority(Role role) {
-        this.authority = role.getName();
+        this.authority = role.getName().toString();
     }
 
     @Override

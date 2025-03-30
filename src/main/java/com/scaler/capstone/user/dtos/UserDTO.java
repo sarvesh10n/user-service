@@ -1,5 +1,6 @@
 package com.scaler.capstone.user.dtos;
 
+import com.scaler.capstone.user.enums.Roles;
 import com.scaler.capstone.user.models.Role;
 import com.scaler.capstone.user.models.User;
 import lombok.Getter;
@@ -15,7 +16,7 @@ public class UserDTO {
     private String name;
     private String email;
     private String address;
-    private List<String> roles;
+    private List<Roles> roles;
 
     public static UserDTO fromUser(User user){
         UserDTO userDTO = new UserDTO();
@@ -33,7 +34,7 @@ public class UserDTO {
         }
 
         if(user.getRoles() != null){
-            List<String> roles = new ArrayList<>();
+            List<Roles> roles = new ArrayList<>();
             for(Role role : user.getRoles())
             {
                 roles.add(role.getName());

@@ -1,5 +1,6 @@
 package com.scaler.capstone.user.services;
 
+import com.scaler.capstone.user.enums.Roles;
 import com.scaler.capstone.user.dtos.ResetPasswordDTO;
 import com.scaler.capstone.user.dtos.SignUpRequestDTO;
 import com.scaler.capstone.user.exception.InvalidDataException;
@@ -50,7 +51,7 @@ public class UserService {
         String state = signUpRequestDTO.getState();
         String zip = signUpRequestDTO.getZipcode();
         String country = signUpRequestDTO.getCountry();
-        List<String> roles = signUpRequestDTO.getRoles();
+        List<Roles> roles = signUpRequestDTO.getRoles();
 
 
         if(!isValidPassword(password))
@@ -64,7 +65,7 @@ public class UserService {
         List<Role> roleList = new ArrayList<>();
         if(!roles.isEmpty())
         {
-            for(String role : roles)
+            for(Roles role : roles)
             {
                 Optional<Role> roleOptional = roleRepository.findByName(role);
                 if(roleOptional.isPresent())
@@ -155,7 +156,7 @@ public class UserService {
         return user.get().getResetPasswordQuestion();
     }
 
-    public User addRole(Long id, String roleName)
+    public User addRole(Long id, Roles roleName)
     {
         Optional<User> existingUser = userRepository.findById(id);
         if(existingUser.isEmpty())
@@ -179,7 +180,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User removeRole(Long id, String roleName) throws InvalidDataException {
+    public User removeRole(Long id, Roles roleName) throws InvalidDataException {
         Optional<User> existingUser = userRepository.findById(id);
         if(existingUser.isEmpty())
         {
