@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 public class UserService {
 
     private final String PASSWORD_REGEX =
-            "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
+            "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&#])[A-Za-z\\d@$!%*?&#]{8,}$";
 
     private final Pattern pattern = Pattern.compile(PASSWORD_REGEX);
 
@@ -51,21 +51,14 @@ public class UserService {
         String zip = signUpRequestDTO.getZipcode();
         String country = signUpRequestDTO.getCountry();
         List<String> roles = signUpRequestDTO.getRoles();
-        String resetPasswordQuestion = signUpRequestDTO.getResetPasswordQuestion();
-        String resetPasswordAnswer = signUpRequestDTO.getResetPasswordAnswer();
 
-        if(email == null || password == null || name == null || street == null || city == null || state == null
-                || zip == null || country == null || roles == null || resetPasswordQuestion == null
-                || resetPasswordAnswer == null)
-        {
-            throw new InvalidDataException("Invalid data");
-        }
 
         if(!isValidPassword(password))
         {
-            throw new InvalidPasswordException("Invalid Password. Password should be at least 8 characters long " +
-                    "and should have at least one digit, one uppercase letter, " +
-                    "one lowercase letter and one special character");
+            throw new InvalidPasswordException("Invalid password. It must be at least 8 characters long and include at least one digit," +
+                    " one uppercase letter, one lowercase letter," +
+                    " and one special character.");
+
         }
 
         List<Role> roleList = new ArrayList<>();
@@ -91,9 +84,9 @@ public class UserService {
             throw new InvalidDataException("Roles is mandatory while creating user");
         }
 
-        Optional<User> user = userRepository.findByEmail(email);
-        if(!user.isEmpty()) {
-            throw new UserAlreadyExistException("User already present: " + email);
+        Optional<User> existingUser = userRepository.findByEmail(email);
+        if(existingUser.isPresent()) {
+            throw new UserAlreadyExistException("User with email id "+email+" already exists: ");
         }
 
         Address address = new Address();
@@ -103,13 +96,15 @@ public class UserService {
         address.setZipcode(zip);
         address.setCountry(country);
 
-        User newUser = new User();
-        newUser.setName(name);
-        newUser.setEmail(email);
-        newUser.setHashedPassword(bcryptpasswordencoder.encode(password));
-        newUser.setAddress(address);
-        newUser.setRoles(roleList);
-        return userRepository.save(newUser);
+        User user = new User();
+        user.setName(name);
+        user.setEmail(email);
+        user.setHashedPassword(bcryptpasswordencoder.encode(password));
+        user.setAddress(address);
+        user.setRoles(roleList);
+        user.setResetPasswordAnswer(signUpRequestDTO.getResetPasswordAnswer());
+        user.setResetPasswordQuestion(signUpRequestDTO.getResetPasswordQuestion());
+        return userRepository.save(user);
     }
 
     public User getUserByEmail(String email)  {
@@ -128,13 +123,12 @@ public class UserService {
     }
 
     public User resetPassword(ResetPasswordDTO resetPasswordDTO) throws InvalidDataException {
-        Optional<User> optionlUser = userRepository.findByEmail(resetPasswordDTO.getEmail());
-        if(optionlUser.isEmpty())
+        Optional<User> existingUser = userRepository.findByEmail(resetPasswordDTO.getEmail());
+        if(existingUser.isEmpty())
         {
-            throw new UsernameNotFoundException("User by Email: " + resetPasswordDTO.getEmail()
-                    + " doesn't exist.");
+            throw new UsernameNotFoundException("Email Id : " + resetPasswordDTO.getEmail()+ " is not present");
         }
-        User user = optionlUser.get();
+        User user = existingUser.get();
         String actualResetPasswordQuestion = user.getResetPasswordQuestion();
         String actualResetPasswordAnswer = user.getResetPasswordAnswer();
 
@@ -156,19 +150,19 @@ public class UserService {
     public String getResetPasswordQuestion(String email) throws InvalidDataException {
         Optional<User> user = userRepository.findByEmail(email);
         if(user.isEmpty()){
-            throw new UsernameNotFoundException("User by Email: " + email + " doesn't exist.");
+            throw new UsernameNotFoundException("Email Id : " + email + " doesn't exist.");
         }
         return user.get().getResetPasswordQuestion();
     }
 
     public User addRole(Long id, String roleName)
     {
-        Optional<User> optionalUser = userRepository.findById(id);
-        if(optionalUser.isEmpty())
+        Optional<User> existingUser = userRepository.findById(id);
+        if(existingUser.isEmpty())
         {
-            throw new UsernameNotFoundException("User by id: " + id + " doesn't exist.");
+            throw new UsernameNotFoundException("Invalid UserId: " + id );
         }
-        User user = optionalUser.get();
+        User user = existingUser.get();
 
         Role addRole;
         if(roleRepository.findByName(roleName).isPresent())
@@ -186,12 +180,12 @@ public class UserService {
     }
 
     public User removeRole(Long id, String roleName) throws InvalidDataException {
-        Optional<User> optionalUser = userRepository.findById(id);
-        if(optionalUser.isEmpty())
+        Optional<User> existingUser = userRepository.findById(id);
+        if(existingUser.isEmpty())
         {
-            throw new UsernameNotFoundException("User by id: " + id + " doesn't exist.");
+            throw new UsernameNotFoundException("Invalid UserId: " + id );
         }
-        User user = optionalUser.get();
+        User user = existingUser.get();
 
         Optional<Role> optionalRole = roleRepository.findByName(roleName);
         if(optionalRole.isEmpty())
@@ -204,13 +198,13 @@ public class UserService {
 
     public User updateUser(Long id, Map<String, Object> updates)
     {
-        Optional<User> optionalUser = userRepository.findById(id);
-        if(optionalUser.isEmpty())
+        Optional<User> existingUser = userRepository.findById(id);
+        if(existingUser.isEmpty())
         {
-            throw new UsernameNotFoundException("User by id: " + id + " doesn't exist.");
+            throw new UsernameNotFoundException("Invalid UserId: " + id );
         }
 
-        User user = optionalUser.get();
+        User user = existingUser.get();
         updates.forEach((key, value) -> {
             switch (key) {
                 case "name":
@@ -249,11 +243,11 @@ public class UserService {
     }
 
     public void deleteUser(String email){
-        Optional<User> optionalUser = userRepository.findByEmail(email);
-        if(optionalUser.isEmpty()){
+        Optional<User> existingUser = userRepository.findByEmail(email);
+        if(existingUser.isEmpty()){
             throw new UsernameNotFoundException("User by email: " + email + " doesn't exist.");
         }
-        User user = optionalUser.get();
+        User user = existingUser.get();
         user.getRoles().removeAll(user.getRoles());
         userRepository.delete(user);
     }

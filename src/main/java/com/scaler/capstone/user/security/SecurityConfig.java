@@ -60,8 +60,7 @@ public class SecurityConfig {
                         authorize
                                 .anyRequest().authenticated()
                 )
-                // Redirect to the login page when not authenticated from the
-                // authorization endpoint
+
                 .exceptionHandling((exceptions) -> exceptions
                         .defaultAuthenticationEntryPointFor(
                                 new LoginUrlAuthenticationEntryPoint("/login"),
@@ -80,17 +79,16 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                                 .requestMatchers("/users/signup","users/resetpassword","users/getresetpasswordquestion/**").permitAll() // Public endpoints
                                 .requestMatchers("/users/getuser/**", "/users/addrole/**", "/users/removerole/**", "/users/updateuser/**","/users/deleteuser/**").authenticated() // Require authentication for this endpoint
-                        //.anyRequest().authenticated()
+
                 )
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.disable())
-                //we can  use this as well with custom jwtAuthenticationConverter
+
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt
                                 .jwtAuthenticationConverter(jwtAuthenticationConverter())
                         )
                 );
-        //.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
 
 
         return http.build();
@@ -146,7 +144,6 @@ public class SecurityConfig {
         return AuthorizationServerSettings.builder().build();
     }
 
-    //This implementation is to customize jwt to add extra fields
     @Bean
     public OAuth2TokenCustomizer<JwtEncodingContext> jwtTokenCustomizer() {
         return (context) -> {

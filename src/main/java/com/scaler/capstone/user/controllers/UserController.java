@@ -1,13 +1,14 @@
 package com.scaler.capstone.user.controllers;
 
-import com.scaler.capstone.user.dtos.*;
+import com.scaler.capstone.user.dtos.ResetPasswordDTO;
+import com.scaler.capstone.user.dtos.SignUpRequestDTO;
+import com.scaler.capstone.user.dtos.UserDTO;
 import com.scaler.capstone.user.exception.InvalidDataException;
 import com.scaler.capstone.user.exception.InvalidPasswordException;
 import com.scaler.capstone.user.exception.UserAlreadyExistException;
-import com.scaler.capstone.user.models.Token;
 import com.scaler.capstone.user.models.User;
-import com.scaler.capstone.user.services.TokenService;
 import com.scaler.capstone.user.services.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -20,6 +21,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,28 +36,27 @@ public class UserController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<UserDTO> signup(@RequestBody SignUpRequestDTO requestDTO) throws UserAlreadyExistException, InvalidPasswordException, InvalidDataException {
+    public ResponseEntity<UserDTO> signup(@Valid @RequestBody  SignUpRequestDTO requestDTO) throws UserAlreadyExistException, InvalidPasswordException, InvalidDataException {
         User user = userService.createUser(requestDTO);
 
         return new ResponseEntity<>(UserDTO.fromUser(user), HttpStatus.CREATED);
     }
 
     @GetMapping("/getallusers")
-    @PreAuthorize("hasRole('ROLE_SUPER_ADMIN')") //This will enable role based access
+    @PreAuthorize("hasRole('ROLE_SUPER_ADMIN')")
     public ResponseEntity<List<UserDTO>> getAllUsers() {
         List<User> userList = userService.getAllUser();
-        List<UserDTO> userDtoList = new ArrayList<>();
+        List<UserDTO> userDTOList = new ArrayList<>();
         for (User user : userList) {
-            userDtoList.add(UserDTO.fromUser(user));
+            userDTOList.add(UserDTO.fromUser(user));
         }
-        return new ResponseEntity<>(userDtoList, HttpStatus.OK);
+        return new ResponseEntity<>(userDTOList, HttpStatus.OK);
     }
 
     @GetMapping("/getuser/{email}")
     public ResponseEntity<UserDTO> getUsersByEmail(@PathVariable String email) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication instanceof JwtAuthenticationToken) {
-            // Extract the JWT token
             Jwt jwt = ((JwtAuthenticationToken) authentication).getToken();
             String username = jwt.getClaim("sub");  // username is email
             if (!email.equalsIgnoreCase(username)) { // Case-insensitive check
@@ -63,7 +64,7 @@ public class UserController {
             }
         }
         else {
-            throw new BadCredentialsException("Authentication is not valid.");
+            throw new BadCredentialsException("Invalid Authentication");
         }
 
         User user = userService.getUserByEmail(email);
@@ -71,18 +72,15 @@ public class UserController {
     }
 
     @GetMapping("/getresetpasswordquestion/{email}")
-    public ResponseEntity<String> getResetPasswordQuestion(@PathVariable String email) throws InvalidDataException {
+    public ResponseEntity<Map> getResetPasswordQuestion(@PathVariable String email) throws InvalidDataException {
         String question = userService.getResetPasswordQuestion(email);
-        String jsonResponse = "{\"resetPasswordQuestion\":\""+question+"\"}";
-        return new ResponseEntity<>(jsonResponse, HttpStatus.OK);
+        Map<String,String> response = new HashMap<>();
+        response.put("resetPasswordQuestion",question);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping("/resetpassword")
-    public ResponseEntity<UserDTO> resetPassword(@RequestBody ResetPasswordDTO resetPasswordDTO) throws InvalidDataException {
-        if(resetPasswordDTO.getEmail()== null || resetPasswordDTO.getResetPasswordQuestion() == null
-                || resetPasswordDTO.getResetPasswordAnswer() == null || resetPasswordDTO.getNewPassword() == null){
-            throw new InvalidDataException("Invalid Request Body.");
-        }
+    public ResponseEntity<UserDTO> resetPassword(@RequestBody @Valid ResetPasswordDTO resetPasswordDTO) throws InvalidDataException {
         User user = userService.resetPassword(resetPasswordDTO);
         return new ResponseEntity<>(UserDTO.fromUser(user), HttpStatus.OK);
     }
@@ -92,7 +90,6 @@ public class UserController {
     {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication instanceof JwtAuthenticationToken) {
-            // Extract the JWT token
             Jwt jwt = ((JwtAuthenticationToken) authentication).getToken();
             String userId = jwt.getClaim("userId");  // username is email
             if (!userId.equalsIgnoreCase(String.valueOf(id))) { // Case-insensitive check
@@ -111,7 +108,6 @@ public class UserController {
     public ResponseEntity<UserDTO> removeRole(@PathVariable Long id, @RequestParam String roleName) throws InvalidDataException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication instanceof JwtAuthenticationToken) {
-            // Extract the JWT token
             Jwt jwt = ((JwtAuthenticationToken) authentication).getToken();
             String userId = jwt.getClaim("userId");  // username is email
             if (!userId.equalsIgnoreCase(String.valueOf(id))) { // Case-insensitive check
@@ -131,7 +127,6 @@ public class UserController {
     {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication instanceof JwtAuthenticationToken) {
-            // Extract the JWT token
             Jwt jwt = ((JwtAuthenticationToken) authentication).getToken();
             String userId = jwt.getClaim("userId");  // username is email
             if (!userId.equalsIgnoreCase(String.valueOf(id))) { // Case-insensitive check
@@ -150,7 +145,6 @@ public class UserController {
     public ResponseEntity<Void> deleteUser(@PathVariable String email ) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication instanceof JwtAuthenticationToken) {
-            // Extract the JWT token
             Jwt jwt = ((JwtAuthenticationToken) authentication).getToken();
             String username = jwt.getClaim("sub");  // username is email
             if (!email.equalsIgnoreCase(username)) { // Case-insensitive check
@@ -160,7 +154,6 @@ public class UserController {
         else {
             throw new BadCredentialsException("Authentication is not valid.");
         }
-
         userService.deleteUser(email);
         return new ResponseEntity<>(HttpStatus.OK);
     }
