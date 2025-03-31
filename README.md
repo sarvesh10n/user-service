@@ -1,15 +1,8 @@
 
 
-# Setup Database
+# Setup
 
-## Database queries for initial setup
-
-```
-create user 'sarvesh'@'localhost';
-create database userservice;
-grant all privileges on userservice.* to 'sarvesh'@'localhost';
-```
-
+## Please refer project-documentation repository for entire setup.
 
 # User API Documentation
 
@@ -37,7 +30,7 @@ Authorization: OAuth2.0 token
 
 ## Registering a New Client with OAuth2 Server
 
-- A new client can be registered with the OAuth2 server by running the test `addRegisterSampleClient` available in the `ScalerCapstoneUserApplicationTests` class, located in `src/test/java/com/scaler/capstone/user/ScalerCapstoneUserApplicationTests.java` by providing `ClientId`, `ClientSecret`, `redirectUri`, `postLogoutRedirectUri`. Provide client secret by encrypting it using Bcrypt.
+- Flyway V5_clientsetup.sql automatically adds one client to the database. Client Id is `scaler` and Client Secret is `scaler-secret` 
 
 ## Endpoints
 
@@ -80,34 +73,10 @@ POST /users/signup
 
 **Response Code:** `201 Created`
 
----
-
-### 2. Get All Users (Requires Authentication)
-
-**Endpoint:**
-
-```
-GET /users/getallusers
-```
-
-**Description:** Fetches all users (Only accessible by `SUPER_ADMIN`). **Response:**
-
-```json
-[
-  {
-    "id": 1,
-    "email": "sarvesh@scaler.com",
-    "name": "Sarvesh Nerurkar",
-    "roles": ["USER"]
-  }
-]
-```
-
-**Response Code:** `200 OK`
 
 ---
 
-### 3. Get User by Email (Requires Authentication)
+### 2. Get User by Email (Requires Authentication)
 
 **Endpoint:**
 
@@ -130,7 +99,7 @@ GET /users/getuser/{email}
 
 ---
 
-### 4. Get Reset Password Question (Public)
+### 3. Get Reset Password Question (Public)
 
 **Endpoint:**
 
@@ -150,7 +119,7 @@ GET /users/getresetpasswordquestion/{email}
 
 ---
 
-### 5. Reset Password (Public)
+### 4. Reset Password (Public)
 
 **Endpoint:**
 
@@ -184,7 +153,7 @@ POST /users/resetpassword
 
 ---
 
-### 6. Update User Details (Requires Authentication)
+### 5. Update User Details (Requires Authentication)
 
 **Endpoint:**
 
@@ -216,7 +185,7 @@ PATCH /users/updateuser/{id}
 
 ---
 
-### 7. Add Role to User (Requires Authentication)
+### 6. Add Role to User (Requires Authentication)
 
 **Endpoint:**
 
@@ -244,7 +213,7 @@ roleName=ADMIN
 
 ---
 
-### 8. Remove Role from User (Requires Authentication)
+### 7. Remove Role from User (Requires Authentication)
 
 **Endpoint:**
 
@@ -272,7 +241,7 @@ roleName=ROLE_ADMIN
 
 ---
 
-### 9. Delete User (Requires Authentication)
+### 8. Delete User (Requires Authentication)
 
 **Endpoint:**
 
